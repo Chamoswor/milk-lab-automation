@@ -1,0 +1,26 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: frontend-nginx-config
+  namespace: default
+data:
+  default.conf: |
+    server {
+      listen       80;
+      listen  [::]:80;
+      server_name  localhost;
+
+      root   /usr/share/nginx/html;
+      index  index.html;
+
+      # Try to serve file, then directory, then fallback to index.html
+      location / {
+        try_files $uri $uri/ /index.html;
+      }
+
+      # Optional: serve 50x error page
+      error_page   500 502 503 504  /50x.html;
+      location = /50x.html {
+        root   /usr/share/nginx/html;
+      }
+    }
