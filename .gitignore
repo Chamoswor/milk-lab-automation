@@ -1,0 +1,107 @@
+##################################
+# 1. Private/hemmelige filer
+##################################
+secrets/
+.env*
+.env.github
+!.env.example
+!.env.github.example
+GHCR_TOKEN.enc
+
+##################################
+# 2. Node / JS / TS
+##################################
+node_modules/
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+dist/
+build/
+coverage/
+.nyc_output/
+.eslintcache
+.next/
+.nuxt/
+.svelte-kit/
+.parcel-cache/
+.turbo/
+*.tsbuildinfo
+*.tgz
+*.tar.gz
+
+##################################
+# 3. Python
+##################################
+__pycache__/
+*.py[cod]
+*$py.class
+*.so
+.Python
+env/
+venv/
+ENV/
+.venv/
+.mypy_cache/
+.pytest_cache/
+.coverage
+ruff_cache/
+__pypackages__/
+
+##################################
+# 4. Docker / Kubernetes
+##################################
+docker-compose.override.yml
+docker-compose.yaml
+*.log
+k8s/*secret*.yaml
+k8s/*.secret.yaml
+k8s/python-deployment.yaml
+k8s/nginx-deployment.yaml
+k8s/frontend-deployment.yaml
+k8s/backend-deployment.yaml
+
+k8s/ingress-traefik.yaml
+k8s/ingress-nginx.yaml
+
+
+##################################
+# 5. Databaser
+##################################
+mysql/data/
+mysql/mydb/
+mysql/performance_schema/
+mysql/sys/
+
+##################################
+# 6. Nginx / SSL
+##################################
+nginx/ssl/
+*.pem
+*.key
+*.crt
+*.p12
+
+##################################
+# 7. IDE / Editor
+##################################
+.vscode/
+.idea/
+*.swp
+*.swo
+*~
+
+##################################
+# 8. OS-genererte filer
+##################################
+.DS_Store*
+._*
+.Spotlight-V100
+.Trashes
+ehthumbs.db
+Thumbs.db
+
+##################################
+# 9. Midlertidige filer
+##################################
+*.tmp
+*.temp

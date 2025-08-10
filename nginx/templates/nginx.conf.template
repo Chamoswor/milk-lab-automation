@@ -1,0 +1,71 @@
+resolver 127.0.0.11 ipv6=off valid=30s;
+
+upstream backend {
+    server backend:3000;
+}
+upstream frontend {
+    server frontend:80;
+}
+
+# HTTP
+server {
+    listen 80;
+    server_name ${NGINX_SERVER_NAME} ${NGINX_SERVER_NAME_WWW};
+
+    # strip /api/ prefix before proxying
+    location /api/ {
+        proxy_pass         http://backend/;
+        proxy_set_header   Host      $host;
+        proxy_set_header   X-Real-IP $remote_addr;
+    }
+
+    # SPA & static
+    location / {
+        proxy_pass             http://frontend;
+        proxy_set_header       Host      $host;
+        proxy_set_header       X-Real-IP $remote_addr;
+
+        proxy_intercept_errors on;
+        error_page   500 502 503 504  /50x.html;
+        location = /50x.html {
+            root   /usr/share/nginx/html;
+        }
+    }
+}
+
+# HTTPS
+server {
+    listen 443 ssl;
+    listen [::]:443 ssl;
+    http2 on;
+
+    server_name ${NGINX_SERVER_NAME} ${NGINX_SERVER_NAME_WWW};
+
+    ssl_certificate     /etc/nginx/ssl/${NGINX_SERVER_NAME}.crt;
+    ssl_certificate_key /etc/nginx/ssl/${NGINX_SERVER_NAME}.key;
+    ssl_dhparam         /etc/nginx/ssl/dhparam.pem;
+    ssl_protocols       TLSv1.2 TLSv1.3;
+    ssl_ciphers         HIGH:!aNULL:!MD5;
+    ssl_prefer_server_ciphers on;
+
+    # strip /api/ prefix before proxying
+    location /api/ {
+        proxy_pass         http://backend/;
+        proxy_set_header   Host      $host;
+        proxy_set_header   X-Real-IP $remote_addr;
+    }
+
+    # SPA & static
+    location / {
+        proxy_pass             http://frontend;
+        proxy_set_header       Host      $host;
+        proxy_set_header       X-Real-IP $remote_addr;
+
+        proxy_intercept_errors on;
+        
+        error_page   500 502 503 504  /50x.html;
+        location = /50x.html {
+            root   /usr/share/nginx/html;
+        }
+    }
+}

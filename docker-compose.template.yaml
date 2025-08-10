@@ -1,0 +1,122 @@
+secrets:
+  db-password:
+    file: ./secrets/db-password
+  mysql-root-password:
+    file: ./secrets/mysql-root-password
+  session-secret:
+    file: ./secrets/session-secret
+  admin-password:
+    file: ./secrets/admin-password
+
+networks:
+  secure_network:
+    driver: bridge
+    ipam:
+      config:
+        - subnet: ${SUBNET}
+
+services:
+  frontend:
+    build:
+      context: ./frontend
+      dockerfile: Dockerfile.dev
+    container_name: vue_app
+    networks:
+      secure_network:
+        ipv4_address: ${FRONTEND_IP}
+    env_file: .env            
+    ports:
+      - "5173:5173"
+    volumes:
+      - ./frontend:/app
+      - /app/node_modules
+    command: npm run dev -- --host
+    restart: unless-stopped
+    depends_on: [ backend ]
+
+  backend:
+    build: ./backend
+    container_name: node_api
+    networks:
+      secure_network:
+        ipv4_address: ${BACKEND_IP}
+    env_file: .env
+    secrets: 
+      - db-password
+      - session-secret
+      - admin-password
+    environment:
+      DB_PASSWORD_FILE: /run/secrets/db-password
+      SESSION_SECRET_FILE: /run/secrets/session-secret
+      ADMIN_PASSWORD_FILE: /run/secrets/admin-password
+
+    volumes:
+      - ./backend:/app
+      - /app/node_modules
+    ports: [ "3000:3000" ]
+    restart: unless-stopped
+    depends_on: [ mysql ]
+
+  mysql:
+    image: mysql:8.0
+    container_name: mysql_db
+    deploy:
+      resources:
+        limits:
+          cpus: "0.5"
+    networks:
+      secure_network:
+        ipv4_address: ${MYSQL_IP}
+    command: --default-authentication-plugin=mysql_native_password
+    env_file: .env
+    secrets:
+      - db-password
+      - mysql-root-password
+
+    environment:
+      MYSQL_ROOT_PASSWORD_FILE: /run/secrets/mysql-root-password
+      MYSQL_PASSWORD_FILE: /run/secrets/db-password
+
+    ports: [ "0.0.0.0:3306:3306" ]
+    volumes:
+      - ./mysql/data:/var/lib/mysql
+      - ./mysql/config/my.cnf:/etc/mysql/my.cnf
+    restart: unless-stopped
+
+  python:
+    build: ./python
+    container_name: python
+    env_file: .env
+    environment:
+      DB_PASSWORD_FILE: /run/secrets/db-password
+    secrets:
+      - db-password
+    networks:
+      secure_network:
+        ipv4_address: ${PYTHON_IP}
+    ports:
+      - "4840:4840"
+      - "8000:8000"
+    volumes:
+      - ./python:/app
+    depends_on: [ mysql ]
+    restart: unless-stopped
+
+  nginx:
+    build:
+      context: ./nginx
+      dockerfile: Dockerfile.dev
+    container_name: nginx_proxy
+    env_file: .env
+    networks:
+      secure_network:
+        ipv4_address: ${NGINX_IP}
+    ports:
+      - "80:80"
+      - "443:443"
+    volumes:
+      - ./nginx/templates/nginx.conf.template.dev:/etc/nginx/templates/default.conf.template:ro
+      - ./nginx/ssl:/etc/nginx/ssl
+      - ./frontend/dist:/usr/share/nginx/html
+    depends_on: [ frontend, backend ]
+    restart: unless-stopped

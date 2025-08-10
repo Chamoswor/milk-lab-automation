@@ -1,0 +1,29 @@
+apiVersion: v1
+data:
+  BACKEND_IP: 172.20.0.30
+  BASE_URL: /
+  CORS_ORIGIN: https://localhost
+  DB_HOST: mysql
+  DB_NAME: mydb
+  DB_USER: user
+  FRONTEND_IP: 172.20.0.20
+  MYSQL_DATABASE: mydb
+  MYSQL_IP: 172.20.0.50
+  MYSQL_USER: user
+  NGINX_IP: 172.20.0.40
+  NGINX_SERVER_NAME: localhost
+  NGINX_SERVER_NAME_WWW: www.localhost
+  NODE_ENV: development
+  PYTHON_IP: 172.20.0.60
+  SSL_COUNTRY_NAME: "NO"
+  SSL_DIR: /etc/nginx/ssl
+  SSL_LOCALITY_NAME: Trondheim
+  SSL_ORGANIZATION_NAME: Private
+  SSL_STATE_OR_PROVINCE_NAME: Trondelag
+  SUBNET: 172.20.0.0/16
+  VITE_API_URL: https://localhost/api
+  VITE_WS_URL: ws://localhost
+kind: ConfigMap
+metadata:
+  creationTimestamp: null
+  name: env
